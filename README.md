@@ -18,7 +18,7 @@ no templates, arquivos static no django, diferenciando o trabalho local e o de p
 # Tecnologias utilizadas
 
 ## Back end
-- Python
+- Python-3.12.3
 
 ## Front end
 - CSS
