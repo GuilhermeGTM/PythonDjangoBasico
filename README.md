@@ -3,7 +3,7 @@
 
 # Sobre o projeto
 
-O projeto é primeira fase que tenho contato com Django, aprendendo com arquitetura django, diferenciando projeto de aplicações, padrão MTV, configurando settings,
+  O projeto é primeira fase que tenho contato com Django, aprendendo com arquitetura django, diferenciando projeto de aplicações, padrão MTV, configurando settings,
 criar views, dividindo rotas em projeto e aplicação, templates, models, interface administrativa registrando models, conhecimento com o shell, consultas em DB e apresentandos 
 no templates, arquivos static no django, diferenciando o trabalho local e o de produção com DEBUG.
 
