@@ -1,0 +1,340 @@
+##criando ambiente virtal venv
+-->python -m venv .venv
+
+##ativando o venv powershell
+-->.\.venv\Scripts\Activate.ps1
+
+##instalando depedencia django
+-->pip install django
+
+##criando requirements.txt
+-->pip freeze > requirements.txt
+
+##criando projeto django, django1 é o nome do projeto
+-->django-admin startproject django1 .
+
+##criando uma aplicação em django, nome core
+--> django-admin startapp core
+
+##informar no settings em app colocar o app que foi criado e o diretório de templates
+
+##para dar start na aplicação se usa o comando
+-->python manage.py runserver
+
+##Cuidado com debug
+dentro de settings tem um debug True
+quando estamos desenvolvendo deixamos o debug True
+quando vamos publicar ele fica False
+
+##criando views
+---dentro da app tem um arquivo views.py dentro dele criamos as views um exemplo:
+\\def index(request):
+    return render(request, 'index.html')//
+
+##criando rotas
+---quando criamos um projeto django ele que tem o arquivo de urls de rotas, porem de forma profissional não é recomendado que coloque
+todos arquivos de rotas dentro dele, o recomendado é adicionar o include e adicionar cada aplicação exemplo:
+**
+from django.contrib import admin
+from django.urls import path, include
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('core.urls')),
+    path('cliente', include('cliente.urls'))
+]
+**
+
+---dentro de cada aplicação tu vai criar urls exemplo:
+**
+from django.urls import path
+from .views import index, contato
+urlpatterns = [
+    path('', index, name='index'),
+    path('contato', contato, name='contato'),
+]
+**
+// lembrando no caso path('') vazio é a raiz ou seja o index caso contratio se coloca o nome para fazer o / no url
+
+##criando chave para usar no html
+--dentro da views na aplicação colocaremos a chave dentro da função exemplo:
+**
+def index(request):
+    context = {
+        'curso': 'Programação Web com Django Framework',
+        'outro': 'Django é massa'
+    }
+    return render(request, 'index.html', context)
+**
+
+--dentro da pagina index.html usaremos a chave exemplo:
+**
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Django1 - Index</title>
+</head>
+<body>
+    <h1>Index</h1>
+    <h2>{{ curso }}</h2>
+    <h2>{{ outro }}</h2>
+</body>
+</html>
+**
+veja que o 'curso e outro' está sendo invocado no h2
+
+##Criando models
+dentro de settings em INSTALLED_APPS tem que está adicionado o nome da aplicação no caso core para que
+funcione os comandos migration
+dentro da aplicação no arquivo models.py criamos as classes exemplo:
+**
+from django.db import models
+
+
+class produto(models.Model):
+    nome = models.CharField('Nome', max_length=100)
+    preco = models.DecimalField('Preço')
+    estoque = models.IntegerField('Quantidade em Estoque')
+
+    def __str__(self):
+        return self.nome
+**
+essa função __str__ é para retornar o nome na area adminstrativa
+
+##criando migrations
+toda vez que tu cria um models tu cria uma migration e depois executa a depedencia
+--->python manage.py makemigrations
+make migrations ele le todas aplicações que tem no projeto tem que está configurada no settings
+
+##executando as migrations
+-->python manage.py migrate
+
+##acessando interface de administrador do django
+para acessar é só usar /admin no server
+caso queira mudar o /admin para outro nome acessando mais seguro é só ir em urls.py e mudar o path caminho
+para criar senha de superusuario e login usaremos
+--->python manage.py createsuperuser
+usuario admin
+email   guilherme-gtm@hotmail.com
+senha admin123
+
+#Registrando na aplicação os models
+dentro da aplicação no caso core dentro de admin.py 
+serve para importar nossos modeles e registar na adminstração
+colocamos os codigos exemplo:
+**
+from django.contrib import admin
+
+from .models import Produto, Cliente
+
+
+class ProdutoAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'preco', 'estoque')
+
+
+class ClienteAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'sobrenome', 'email')
+
+
+admin.site.register(Produto, ProdutoAdmin)
+admin.site.register(Cliente, ClienteAdmin)
+
+**
+
+##usado o shell
+com esse comando abaixo podemos fazer inset dentro do banco de dados
+---> python manage.py shell 
+
+fazendo um import apos o comando
+---> from core.models import Cliente
+--->cliente = Cliente(nome='Angelina', sobrenome='Jolie', email='angelina@gmail.com')
+para salver no banco usamos:
+--->cliente.save()
+comandos para testar
+--->cliente.pk pega chave primaria
+--->cliente.id pega o id
+--->cliente pega o nome do cliente
+---cliente.nome = 'Maria' muda o nome do cliente para Maria
+--->cliente.delete() deleta o cliente
+
+##testanso comandos do shell
+usando dir(objects) tu consegue ver todos os comandos
+--->from core.models import Produto         importando o produto do core.models
+--->produtos = Produto.objects.all()        mostra todo conteudo do DB da tabela produto
+--->produtos = Produto.objects.count()      mostra a quantidade
+--->produtos = Produto.objects.first()      mostra o primeiro
+--->produtos = Produto.objects.last()       mostra o ultimo
+
+
+
+### testando para aparecer se está logado ou não no sistema
+** em views da aplicação
+from django.shortcuts import render
+
+
+def index(request):
+    print(dir(request.user))
+    print(f"User: {request.user}")
+
+    if str(request.user) == 'AnonymousUser':
+        teste = 'Usuario não logado'
+    else:
+        teste = 'Usuario logado'
+    context = {
+        'curso': 'Programação Web com Django Framework',
+        'outro': 'Django é massa',
+        'logado': teste
+    }
+    return render(request, 'index.html', context)
+
+
+def contato(request):
+    return render(request, 'contato.html')
+
+**não esquece de chamar no index o "teste"
+
+
+##comando python em html
+usando essa sintaxe {%%}
+**
+    {%for produto in produtos%}
+        <p>{{ produto }}</p>
+    {% endfor %}
+**
+
+##passando o id para o produto
+** 
+vc coloca o nome da urls.py 'produto' passa o parametro produto.id exemplo
+<td><a href="{% url 'produto' produto.id %}">{{ produto.nome }}</a></td>
+**
+
+##buscando elemento na pela views
+**
+def produto(request, pk):
+    prod = Produto.objects.get(id=pk)
+    context = {
+        'produto': prod
+    }
+    return render(request, 'produto.html', context)
+**
+
+## criando css/js/image
+criamos uma pasta dentro da aplicação no caso core com o nome de static dentro da static criamos 3 pastas
+css,js,image
+
+dentro de setting configuramos dessa maneira
+STATIC_URL = '/static/'  # usado durante o desenvolvimento
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # usado durante a produção
+
+lembrando 
+# DEBUG True está em desenvolvimento está ativado STATIC_URL
+# DEBUG False já estpa em produção está ativado STATIC_ROOT
+DEBUG = True
+
+##arquivos static
+qualquer template que tu for usar  teamplate na primeira linha do html tu coloca
+{% load static %}
+
+
+##como usar o estilo css
+dentro do head do html usamos
+<link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+
+##como usar image 
+colocar a imagem no diretório correto 
+<img src="{% static 'image/django.png' %}">
+
+##como usar javascript
+estou carregando um arquivo dentro da pasta static/jc/script.js
+<script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+
+##usando no modo produção quando o DEBUG está False
+usamos o comando
+--->python manage.py collectstatic
+para criar uma pasta chamda staticfiles , por padrão o servidor django não carrega arquivos static
+
+
+#TRATANDO ERROS
+dentro de urls.py do sistema
+fizemos 2 import e colocamos o codigo
+**
+from django.conf.urls import handler404, handler500
+from core import views
+handler404 = views.error404
+handler500 = views.error500
+**
+
+dentro da viwes da aplicação
+importamos e tratamos
+**
+from django.shortcuts import get_object_or_404
+
+from django.http import HttpResponse
+from django.template import loader
+
+
+
+def produto(request, pk):
+    # prod = Produto.objects.get(id=pk)
+    prod = get_object_or_404(Produto, id=pk)
+    context = {
+        'produto': prod
+    }
+    return render(request, 'produto.html', context)
+
+
+def error404(request, ex):
+    template = loader.get_template('404.html')
+    return HttpResponse(content=template.render(), content_type='text/html; charset=utf8', status=404)
+
+
+def error500(request):
+    template = loader.get_template('500.html')
+    return HttpResponse(content=template.render(), content_type='text/html; charset=utf8', status=500)
+
+**
+criamos em teamplates 2 arquivos 404.html e tratamos e o mesmo com 500.html
+
+
+
+## redirecionando o logout do admin para o index
+dentro de setting usamos
+**
+LOGOUT_REDIRECT_URL = 'index'
+**
+
+
+##Publicando o projeto
+--->pip install whitenoise gunicorn
+whitenoise faz o django ler arquivos etatic
+gunicorn é um servidor para rodar o aplicação na produção
+
+dentro de MIDDLEWARE
+'django.middleware.security.SecurityMiddleware',
+'whitenoise.middleware.WhiteNoiseMiddleware',
+
+whitenoise tem que ficar abaixo do muddleware.security
+
+
+.gitignore
+
+__pycache__
+
+*.*~
+
+*.pyc
+
+.idea
+
+.venv
+
+
+## configurando hiroku
+apos instalar o programa em https://devcenter.heroku.com/articles/getting-started-with-python#set-up
+
+criamos um arquivo runtime.txt na pasta raiz do projeto e colocamos dentro a versão que estamos usando no caso
+python-3.11.7
+
+
+
+criamos um arquivo chamado Procfile na raiz do projeto dentro dele colocamos
+web: gunicorn django1.wsgi --log-file -   isso para acessar a pasta wsgi
