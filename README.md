@@ -23,7 +23,7 @@ no templates, arquivos static no django, diferenciando o trabalho local e o de p
 ## Front end
 - CSS
 - HTML
--JS
+- JS
 
 ## Framework
 - Django==5.1.3
