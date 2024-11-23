@@ -35,8 +35,7 @@ no templates, arquivos static no django, diferenciando o trabalho local e o de p
 **
 
 # Como executar o projeto
-instalar python
-após  o pull
+
 ```bash
 instalar o venv na pasta do projeto
 --->python -m venv .venv
