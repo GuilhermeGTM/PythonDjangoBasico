@@ -113,9 +113,7 @@ para acessar é só usar /admin no server
 caso queira mudar o /admin para outro nome acessando mais seguro é só ir em urls.py e mudar o path caminho
 para criar senha de superusuario e login usaremos
 --->python manage.py createsuperuser
-usuario admin
-email   guilherme-gtm@hotmail.com
-senha admin123
+
 
 #Registrando na aplicação os models
 dentro da aplicação no caso core dentro de admin.py 
